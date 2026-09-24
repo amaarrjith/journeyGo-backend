@@ -84,8 +84,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="JourneyGo AI Recommendation Backend",
     version="1.0.0",
-    description="Self-hosted open-source LLM service for JourneyGo iOS travel recommendation engine.",
-    lifespan=lifespan
+    description="Self-hosted open-source LLM service for JourneyGo iOS travel recommendation engine."
 )
 
 # CORS Configuration (allows iOS simulator, local network devices, and Web)
