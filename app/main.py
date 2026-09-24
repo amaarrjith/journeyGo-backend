@@ -3,6 +3,7 @@ JourneyGo Self-Hosted AI Backend.
 FastAPI service exposing /v1/intent and /v1/explain for the JourneyGo iOS application.
 """
 
+from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Security, Request, status
@@ -95,18 +96,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.middleware("http")
-async def limit_request_size(request: Request, call_next):
-    """Enforces maximum request payload size for defense-in-depth."""
-    content_length = request.headers.get("content-length")
-    if content_length and int(content_length) > settings.max_request_size_bytes:
-        return JSONResponse(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            content={"detail": "Request body exceeds allowed limit (1MB)."}
-        )
-    return await call_next(request)
 
 
 # MARK: - Endpoints
