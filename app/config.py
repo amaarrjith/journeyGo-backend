@@ -4,7 +4,7 @@ Supports configurable LLM providers, models, host endpoints, and security keys.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -24,6 +24,68 @@ class Settings(BaseSettings):
 
     # Limits
     max_request_size_bytes: int = 1_048_576  # 1MB max payload
+
+    @field_validator("port", mode="before")
+    @classmethod
+    def parse_port(cls, v):
+        if v is None or v == "" or (isinstance(v, str) and not v.strip()):
+            return 8000
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return 8000
+
+    @field_validator("max_request_size_bytes", mode="before")
+    @classmethod
+    def parse_max_size(cls, v):
+        if v is None or v == "" or (isinstance(v, str) and not v.strip()):
+            return 1_048_576
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return 1_048_576
+
+    @field_validator("gemini_api_key", "api_key", mode="before")
+    @classmethod
+    def clean_optional_str(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return None
+        return v.strip()
+
+    @field_validator("llm_provider", mode="before")
+    @classmethod
+    def clean_llm_provider(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return "gemini"
+        return v.strip()
+
+    @field_validator("llm_model", mode="before")
+    @classmethod
+    def clean_llm_model(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return "gemini-1.5-flash"
+        return v.strip()
+
+    @field_validator("ollama_base_url", mode="before")
+    @classmethod
+    def clean_ollama_base_url(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return "http://localhost:11434"
+        return v.strip()
+
+    @field_validator("host", mode="before")
+    @classmethod
+    def clean_host(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return "0.0.0.0"
+        return v.strip()
+
+    @field_validator("environment", mode="before")
+    @classmethod
+    def clean_environment(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return "development"
+        return v.strip()
 
     model_config = SettingsConfigDict(
         env_file=".env",

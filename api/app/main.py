@@ -101,9 +101,14 @@ app.add_middleware(
 # MARK: - Endpoints
 
 @app.get("/", tags=["System"])
+@app.get("/api/index.py", include_in_schema=False)
 async def root():
     """Root endpoint for instant deployment verification."""
-    is_connected = await llm_provider.is_available()
+    try:
+        is_connected = await llm_provider.is_available()
+    except Exception as e:
+        logger.warning(f"Failed to check provider availability: {e}")
+        is_connected = False
     return {
         "status": "online",
         "service": "JourneyGo AI Recommendation Backend",
@@ -119,7 +124,11 @@ async def root():
 @app.get("/v1/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
     """System health check and provider readiness report."""
-    is_connected = await llm_provider.is_available()
+    try:
+        is_connected = await llm_provider.is_available()
+    except Exception as e:
+        logger.warning(f"Failed to check provider availability in health_check: {e}")
+        is_connected = False
     return HealthResponse(
         status="healthy" if is_connected else "degraded",
         provider=settings.llm_provider,

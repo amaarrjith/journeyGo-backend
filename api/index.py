@@ -12,11 +12,13 @@ for p in (str(api_dir), str(parent_dir)):
         sys.path.insert(0, p)
 
 try:
-    from app.main import app
+    from app.main import app as _app
 except ImportError:
-    from api.app.main import app
+    from api.app.main import app as _app
 
-# Export AWS Lambda / Vercel handler via Mangum
+app = _app
+
+# Optional AWS Lambda compatibility
 try:
     from mangum import Mangum
     handler = Mangum(app, lifespan="off")
