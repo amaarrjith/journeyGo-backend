@@ -46,3 +46,4 @@ ENV/
 
 # Vercel
 .vercel/
+.vercel
