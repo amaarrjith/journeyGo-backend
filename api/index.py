@@ -3,14 +3,20 @@ import os
 import sys
 from pathlib import Path
 
-# Add backend root to sys.path
-backend_root = Path(__file__).resolve().parent.parent
-if str(backend_root) not in sys.path:
-    sys.path.insert(0, str(backend_root))
+# Add current api directory and parent directory to sys.path
+api_dir = Path(__file__).resolve().parent
+parent_dir = api_dir.parent
 
-from app.main import app
+for p in (str(api_dir), str(parent_dir)):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
-# Provide AWS Lambda / Vercel ASGI handler via Mangum if available
+try:
+    from app.main import app
+except ImportError:
+    from api.app.main import app
+
+# Export AWS Lambda / Vercel handler via Mangum
 try:
     from mangum import Mangum
     handler = Mangum(app, lifespan="off")
